@@ -73,6 +73,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.volley)
 
+    // Preferences DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)

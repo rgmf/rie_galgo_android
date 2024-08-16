@@ -5,10 +5,9 @@ import es.rgmf.riegalgoandroid.model.Token
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 
-interface RieGalgoService {
+interface ApiService {
     @POST("auth/login/")
     @FormUrlEncoded
     suspend fun login(
@@ -17,5 +16,5 @@ interface RieGalgoService {
     ): Token
 
     @GET("medias/ephemeris/")
-    suspend fun getEphemeris(@Header("Authorization") token: String): MediaResponse
+    suspend fun getEphemeris(): MediaResponse
 }
