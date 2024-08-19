@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import coil.network.HttpException
+import retrofit2.HttpException
 import es.rgmf.riegalgoandroid.RieGalgoApplication
 import es.rgmf.riegalgoandroid.data.ApiRepository
 import es.rgmf.riegalgoandroid.data.UserPreferencesRepository
@@ -21,8 +21,8 @@ import java.io.IOException
 
 sealed interface ApiUiState {
     data class Success(val medias: List<Media>) : ApiUiState
-    object Error : ApiUiState
-    object ErrorAuth : ApiUiState
+    data class Error(val message: String) : ApiUiState
+    data class ErrorAuth(val message: String? = null) : ApiUiState
     object Loading : ApiUiState
     object LoadingToken: ApiUiState
 }
@@ -46,8 +46,8 @@ class ApiViewModel(
         viewModelScope.launch {
             val token = userPreferencesRepository.token.firstOrNull()
             if (token.isNullOrEmpty()) {
-                Log.e("RieGalgoUiState", "Token is null or empty")
-                apiUiState = ApiUiState.ErrorAuth
+                Log.d(TAG, "Token is null or empty")
+                apiUiState = ApiUiState.ErrorAuth()
             } else {
                 apiUiState = ApiUiState.Loading
                 getEphemeris()
@@ -62,19 +62,19 @@ class ApiViewModel(
                 userPreferencesRepository.setTokenPreference(tokenObject.accessToken)
                 getEphemeris()
             } catch (e: HttpException) {
-                if (e.response.code == 401) {
-                    Log.e("RieGalgoUiState", "Error 401: Authentication error")
-                    ApiUiState.ErrorAuth
+                if (e.code() == 401) {
+                    Log.d(TAG, "Error 401: Authentication error")
+                    apiUiState = ApiUiState.ErrorAuth("Authentication error")
                 } else {
-                    Log.e("RieGalgoUiState", "Login Error: " + e.message.toString())
-                    ApiUiState.ErrorAuth
+                    Log.d(TAG, "Login Error: " + e.message.toString())
+                    apiUiState = ApiUiState.ErrorAuth("Login error: " + e.message.toString())
                 }
             } catch (e: IOException) {
-                Log.e("RieGalgoUiState", e.message.toString())
-                ApiUiState.Error
+                Log.e(TAG, e.message.toString())
+                apiUiState = ApiUiState.Error("Login Error: " + e.message.toString())
             } catch (e: Exception) {
-                Log.e("RieGalgoUiState", e.toString())
-                ApiUiState.Error
+                Log.e(TAG, e.toString())
+                apiUiState = ApiUiState.Error("Login Error: " + e.message.toString())
             }
         }
     }
@@ -86,19 +86,19 @@ class ApiViewModel(
                 val mediaResponse = apiRepository.getEphemeris()
                 ApiUiState.Success(mediaResponse.data)
             } catch (e: HttpException) {
-                if (e.response.code == 401) {
-                    Log.e("RieGalgoUiState", "Error 401: Authentication error")
-                    ApiUiState.ErrorAuth
+                if (e.code() == 401) {
+                    Log.d(TAG, "Error 401: Authentication error")
+                    ApiUiState.ErrorAuth()
                 } else {
-                    Log.e("RieGalgoUiState", e.message.toString())
-                    ApiUiState.Error
+                    Log.d(TAG, e.message.toString())
+                    ApiUiState.Error("Error in ephemeris: " + e.message.toString())
                 }
             } catch (e: IOException) {
-                Log.e("RieGalgoUiState", e.message.toString())
-                ApiUiState.Error
+                Log.e(TAG, e.message.toString())
+                ApiUiState.Error("Error in ephemeris: " + e.message.toString())
             } catch (e: Exception) {
-                Log.e("RieGalgoUiState", e.toString())
-                ApiUiState.Error
+                Log.e(TAG, e.toString())
+                ApiUiState.Error("Error in ephemeris: " + e.message.toString())
             }
         }
     }
@@ -107,6 +107,8 @@ class ApiViewModel(
      * Factory for [ApiViewModel] that takes [ApiRepository] as a dependency
      */
     companion object {
+        private const val TAG = "ApiViewModel"
+
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as RieGalgoApplication)

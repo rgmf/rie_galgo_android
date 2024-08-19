@@ -24,6 +24,7 @@ import es.rgmf.riegalgoandroid.R
 
 @Composable
 fun AuthScreen(
+    text: String?,
     onLogin: (String, String) -> Unit,
     viewModel: LoginViewModel = viewModel(),
     modifier: Modifier = Modifier
@@ -34,6 +35,15 @@ fun AuthScreen(
         modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
+        if (!text.isNullOrEmpty()) {
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
         OutlinedTextField(
             value = uiState.username,
             onValueChange = { viewModel.updateUsername(it) },

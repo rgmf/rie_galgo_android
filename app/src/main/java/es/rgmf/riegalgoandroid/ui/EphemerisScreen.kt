@@ -30,17 +30,6 @@ fun EphemerisScreen(
     medias: List<Media>,
     modifier: Modifier = Modifier
 ) {
-    MediasGridScreen(
-        medias = medias,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun MediasGridScreen(
-    medias: List<Media>,
-    modifier: Modifier = Modifier
-) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = modifier
@@ -48,10 +37,10 @@ fun MediasGridScreen(
         items(items = medias, key = { media -> media.id }) { media ->
             MediaCard(
                 media,
-                modifier = modifier
+                modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
-                    .aspectRatio(1.5f)
+                    .aspectRatio(1.0f)
             )
         }
     }
@@ -74,7 +63,7 @@ fun MediaCard(
             AsyncImage(
                 model = ImageRequest
                     .Builder(context = LocalContext.current)
-                    .data("http://192.168.1.23:8000/medias/${media.id}/thumbnail/")
+                    .data("https://rieapi.rgmf.es/medias/${media.id}/thumbnail/")
                     .addHeader("Authorization", "Bearer ${token}")
                     .crossfade(true)
                     .build(),

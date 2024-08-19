@@ -2,7 +2,9 @@ package es.rgmf.riegalgoandroid.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -42,12 +44,14 @@ fun RieGalgoApp() {
             }
             is ApiUiState.Error -> {
                 ErrorScreen(
+                    text = uiState.message,
                     retryAction = apiViewModel::getEphemeris,
                     modifier = Modifier.padding(innerPadding)
                 )
             }
             is ApiUiState.ErrorAuth -> {
                 AuthScreen(
+                    text = uiState.message,
                     onLogin = { username, password ->
                         apiViewModel.login(username, password)
                     },
@@ -74,15 +78,19 @@ fun RieGalgoTopBar(
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading_img),
-        contentDescription = stringResource(R.string.loading)
-    )
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(R.drawable.loading_img),
+            contentDescription = stringResource(R.string.loading),
+            modifier = Modifier.size(200.dp).align(Alignment.Center)
+        )
+    }
 }
 
 @Composable
-fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ErrorScreen(text: String, retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -91,7 +99,12 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(id = R.drawable.ic_connection_error), contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(16.dp)
+        )
         Button(onClick = retryAction) {
             Text(stringResource(R.string.retry))
         }
