@@ -2,6 +2,7 @@ package es.rgmf.riegalgoandroid.data
 
 import es.rgmf.riegalgoandroid.model.MediaResponse
 import es.rgmf.riegalgoandroid.model.Token
+import es.rgmf.riegalgoandroid.model.UserResponse
 import es.rgmf.riegalgoandroid.network.ApiService
 
 /**
@@ -9,6 +10,7 @@ import es.rgmf.riegalgoandroid.network.ApiService
  */
 interface ApiRepository {
     suspend fun login(username: String, password: String): Token
+    suspend fun getUser(): UserResponse
     suspend fun getEphemeris(): MediaResponse
 }
 
@@ -19,5 +21,6 @@ class NetworkApiRepository(
     private val apiService: ApiService
 ) : ApiRepository {
     override suspend fun login(username: String, password: String): Token = apiService.login(username, password)
+    override suspend fun getUser(): UserResponse = apiService.getUser()
     override suspend fun getEphemeris(): MediaResponse = apiService.getEphemeris()
 }

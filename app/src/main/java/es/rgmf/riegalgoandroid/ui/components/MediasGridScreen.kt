@@ -1,4 +1,4 @@
-package es.rgmf.riegalgoandroid.ui
+package es.rgmf.riegalgoandroid.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,9 +24,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import es.rgmf.riegalgoandroid.R
 import es.rgmf.riegalgoandroid.model.Media
+import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
 
 @Composable
-fun EphemerisScreen(
+fun MediasGridScreen(
     medias: List<Media>,
     modifier: Modifier = Modifier
 ) {

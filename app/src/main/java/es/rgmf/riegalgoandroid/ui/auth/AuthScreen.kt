@@ -1,4 +1,4 @@
-package es.rgmf.riegalgoandroid.ui
+package es.rgmf.riegalgoandroid.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
