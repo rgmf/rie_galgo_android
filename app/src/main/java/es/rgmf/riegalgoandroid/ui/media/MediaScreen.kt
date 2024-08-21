@@ -56,20 +56,32 @@ fun MediaScreen(
                     val maxFactorX = ((scale * boxSize.width) - boxSize.width) / 2f
                     val maxFactorY = ((scale * boxSize.height) - boxSize.height) / 2f
 
+                    val currentImageSize = imageSize * scale
+
                     Log.d("AAAAAA", "Min factor:   " + (-maxFactorX))
                     Log.d("AAAAAA", "Max factor:   " + maxFactorX)
                     Log.d("AAAAAA", "Min factor:   " + (-maxFactorY))
                     Log.d("AAAAAA", "Max factor:   " + maxFactorY)
                     Log.d("AAAAAA", "coerceIn X:    " + (offsetX + pan.x).coerceIn(-maxFactorX, maxFactorX))
                     Log.d("AAAAAA", "coerceIn X:    " + (offsetY + pan.y).coerceIn(-maxFactorY, maxFactorY))
-                    offsetX = (offsetX + pan.x).coerceIn(-maxFactorX, maxFactorX)
-                    offsetY = (offsetY + pan.y).coerceIn(-maxFactorY, maxFactorY)
+
+                    if (currentImageSize.width >= boxSize.width) {
+                        offsetX = (offsetX + pan.x).coerceIn(-maxFactorX, maxFactorX)
+                    } else {
+                        offsetX = (currentImageSize.width - imageSize.width) / 2f
+                    }
+
+                    if (currentImageSize.height >= boxSize.height) {
+                        offsetY = (offsetY + pan.y).coerceIn(-maxFactorY, maxFactorY)
+                    } else {
+                        offsetY = (currentImageSize.height - imageSize.height) / 2f
+                    }
 
                     Log.d("AAAAAA", "Scale:        " + scale)
                     Log.d("AAAAAA", "Offset X:     " + offsetX)
                     Log.d("AAAAAA", "Offset Y:     " + offsetY)
                     Log.d("AAAAAA", "Box Size:     " + boxSize.width + ", " + boxSize.height)
-                    Log.d("AAAAAA", "Image Size:   " + imageSize.width + ", " + imageSize.height)
+                    Log.d("AAAAAA", "Image Size:   " + currentImageSize.width + ", " + currentImageSize.height)
                     Log.d("AAAAAA---", "-----------------------------------")
                 }
             }
