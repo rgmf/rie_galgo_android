@@ -98,4 +98,10 @@ class UserPreferencesRepository(
             preferences[TOKEN] = token
         }
     }
+
+    suspend fun deleteTokenPreference() {
+        dataStore.edit { preferences ->
+            preferences.remove(TOKEN)
+        }
+    }
 }

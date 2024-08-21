@@ -13,5 +13,7 @@
     <string name="login_action">Login</string>
     <string name="back_button">Back</string>
     <string name="home_button">Home</string>
-    <string name="user_account_button">User</string>
+    <string name="user">User</string>
+    <string name="email">E-Mail</string>
+    <string name="logout">Logout</string>
 </resources>

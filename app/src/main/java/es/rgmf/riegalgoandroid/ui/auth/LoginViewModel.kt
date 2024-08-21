@@ -1,4 +1,4 @@
-package es.rgmf.riegalgoandroid.ui
+package es.rgmf.riegalgoandroid.ui.auth
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
