@@ -7,12 +7,14 @@
     <string name="loading_failed">Failed to load</string>
     <string name="retry">Retry</string>
     <string name="media_thumbnail_content_description">Media\'s thumbnail</string>
+    <string name="media_data_content_description">Media\'s data</string>
     <string name="login_server">Server URL</string>
     <string name="login_username">Username</string>
     <string name="login_password">Password</string>
     <string name="login_action">Login</string>
     <string name="back_button">Back</string>
     <string name="home_button">Home</string>
+    <string name="play_video">Play video</string>
     <string name="user">User</string>
     <string name="email">E-Mail</string>
     <string name="logout">Logout</string>

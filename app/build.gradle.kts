@@ -79,6 +79,9 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
 
     testImplementation(libs.junit)
 
