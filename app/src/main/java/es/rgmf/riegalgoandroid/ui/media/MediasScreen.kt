@@ -33,9 +33,11 @@ import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
+const val TAG = "MediasScreen"
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MediaScreen(
+fun MediasScreen(
     startId: Int,
     ids: List<Int>,
     modifier: Modifier = Modifier
@@ -75,9 +77,7 @@ fun MediaScreen(
                                             )
                                             scale *= distanceCurrent / distancePrevious
                                             offset += change1.positionChange()
-                                            Log.i("TAGTTTTTT",
-                                                "distanceCurrent: $distanceCurrent\ndistancePrevious: $distancePrevious\nscale: $scale\noffset: $offset"
-                                            )
+                                            Log.d(TAG, "distanceCurrent: $distanceCurrent\ndistancePrevious: $distancePrevious\nscale: $scale\noffset: $offset")
                                         }
                                         else -> {
                                             scale = 1f
