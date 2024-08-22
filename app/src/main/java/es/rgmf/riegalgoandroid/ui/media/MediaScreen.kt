@@ -1,11 +1,13 @@
 package es.rgmf.riegalgoandroid.ui.media
 
-import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,13 +30,16 @@ import coil.request.ImageRequest
 import es.rgmf.riegalgoandroid.R
 import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaScreen(
-    id: Int,
+    startId: Int,
+    ids: List<Int>,
     modifier: Modifier = Modifier
 ) {
     val prefsViewModel: PreferencesViewModel = viewModel(factory = PreferencesViewModel.Factory)
     val token by prefsViewModel.tokenFlow.collectAsState(initial = "")
+    val pagerState = rememberPagerState(pageCount = { ids.size }, initialPage = ids.indexOf(startId))
 
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -53,17 +58,10 @@ fun MediaScreen(
                 detectTransformGestures { _, pan, zoom, _ ->
                     scale = (scale * zoom).coerceAtLeast(1f)
 
-                    val maxFactorX = ((scale * boxSize.width) - boxSize.width) / 2f
-                    val maxFactorY = ((scale * boxSize.height) - boxSize.height) / 2f
-
                     val currentImageSize = imageSize * scale
 
-                    Log.d("AAAAAA", "Min factor:   " + (-maxFactorX))
-                    Log.d("AAAAAA", "Max factor:   " + maxFactorX)
-                    Log.d("AAAAAA", "Min factor:   " + (-maxFactorY))
-                    Log.d("AAAAAA", "Max factor:   " + maxFactorY)
-                    Log.d("AAAAAA", "coerceIn X:    " + (offsetX + pan.x).coerceIn(-maxFactorX, maxFactorX))
-                    Log.d("AAAAAA", "coerceIn X:    " + (offsetY + pan.y).coerceIn(-maxFactorY, maxFactorY))
+                    val maxFactorX = ((scale * boxSize.width) - boxSize.width) / 2f
+                    val maxFactorY = (((scale * boxSize.height) - boxSize.height) / 2f)
 
                     if (currentImageSize.width >= boxSize.width) {
                         offsetX = (offsetX + pan.x).coerceIn(-maxFactorX, maxFactorX)
@@ -76,40 +74,38 @@ fun MediaScreen(
                     } else {
                         offsetY = (currentImageSize.height - imageSize.height) / 2f
                     }
-
-                    Log.d("AAAAAA", "Scale:        " + scale)
-                    Log.d("AAAAAA", "Offset X:     " + offsetX)
-                    Log.d("AAAAAA", "Offset Y:     " + offsetY)
-                    Log.d("AAAAAA", "Box Size:     " + boxSize.width + ", " + boxSize.height)
-                    Log.d("AAAAAA", "Image Size:   " + currentImageSize.width + ", " + currentImageSize.height)
-                    Log.d("AAAAAA---", "-----------------------------------")
                 }
             }
     ) {
         if (token.isNotEmpty()) {
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(context = LocalContext.current)
-                    .data("https://rieapi.rgmf.es/medias/${id}/data/")
-                    .addHeader("Authorization", "Bearer ${token}")
-                    .crossfade(true)
-                    .build(),
-                error = painterResource(R.drawable.ic_broken_image),
-                placeholder = painterResource(R.drawable.loading_img),
-                contentDescription = stringResource(R.string.media_data_content_description),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { coordinates ->
-                        imageSize = coordinates.size.toSize()
-                    }
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offsetX,
-                        translationY = offsetY
-                    )
-            )
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                AsyncImage(
+                    model = ImageRequest
+                        .Builder(context = LocalContext.current)
+                        .data("https://rieapi.rgmf.es/medias/${ids[page]}/data/")
+                        .addHeader("Authorization", "Bearer ${token}")
+                        .crossfade(true)
+                        .build(),
+                    error = painterResource(R.drawable.ic_broken_image),
+                    placeholder = painterResource(R.drawable.loading_img),
+                    contentDescription = stringResource(R.string.media_data_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            imageSize = coordinates.size.toSize()
+                        }
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offsetX,
+                            translationY = offsetY
+                        )
+                )
+            }
         } else {
             Image(
                 painter = painterResource(R.drawable.loading_img),

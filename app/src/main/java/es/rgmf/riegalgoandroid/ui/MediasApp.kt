@@ -7,6 +7,12 @@ import androidx.compose.ui.Modifier
 import es.rgmf.riegalgoandroid.ui.media.MediaScreen
 
 @Composable
-fun MediasApp(id: Int) {
-    Scaffold{ innerPadding -> MediaScreen(id = id, modifier = Modifier.padding(innerPadding)) }
+fun MediasApp(id: Int, allIds: List<Int>) {
+    Scaffold{ innerPadding ->
+        MediaScreen(
+            startId = id,
+            ids = allIds,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
 }

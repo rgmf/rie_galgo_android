@@ -1,5 +1,6 @@
 package es.rgmf.riegalgoandroid.ui.components
 
+import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -39,6 +40,8 @@ fun MediasGridScreen(
     medias: List<Media>,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = modifier
@@ -46,6 +49,13 @@ fun MediasGridScreen(
         items(items = medias, key = { media -> media.id }) { media ->
             MediaCard(
                 media,
+                onClickMedia = {
+                    onClickMedia(
+                        clickedMediId = it,
+                        context = context,
+                        allIds = medias.map { it.id }
+                    )
+                },
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
@@ -55,9 +65,19 @@ fun MediasGridScreen(
     }
 }
 
+fun onClickMedia(clickedMediId: Int, context: Context, allIds: List<Int>) {
+
+    val intent = Intent(context, MediasActivity::class.java).apply {
+        putExtra(MediasActivity.EXTRA_SELECTED_MEDIA_ID, clickedMediId)
+        putIntegerArrayListExtra(MediasActivity.EXTRA_MEDIAS_ID, ArrayList(allIds))
+    }
+    context.startActivity(intent)
+}
+
 @Composable
 fun MediaCard(
     media: Media,
+    onClickMedia: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val prefsViewModel: PreferencesViewModel = viewModel(factory = PreferencesViewModel.Factory)
@@ -67,12 +87,7 @@ fun MediaCard(
 
     Card(
         modifier = modifier
-            .clickable {
-                val intent = Intent(context, MediasActivity::class.java).apply {
-                    putExtra(MediasActivity.EXTRA_MEDIA_ID, media.id)
-                }
-                context.startActivity(intent)
-            },
+            .clickable { onClickMedia(media.id) },
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
