@@ -1,10 +1,6 @@
 package es.rgmf.riegalgoandroid.ui.ephemeris
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -17,37 +13,25 @@ import es.rgmf.riegalgoandroid.data.ApiRepository
 import es.rgmf.riegalgoandroid.data.UserPreferencesRepository
 import es.rgmf.riegalgoandroid.model.Media
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-data class EphemerisData(var medias: List<Media>, var skip: Int, val limit: Int, var endReached: Boolean = false)
-
-sealed interface EphemerisUiState {
-    data class Success(val data: EphemerisData) : EphemerisUiState
-    data class Error(val message: String) : EphemerisUiState
-    data class ErrorAuth(val message: String? = null) : EphemerisUiState
-    object Loading : EphemerisUiState
-    object LoadingToken: EphemerisUiState
-}
+data class EphemerisUiState(
+    val medias: List<Media> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String = "",
+    val skip: Int = 0,
+    val limit: Int = 20,
+    val endReached: Boolean = false
+)
 
 class EphemerisViewModel(
     private val apiRepository: ApiRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
-    var ephemerisUiState: EphemerisUiState by mutableStateOf(EphemerisUiState.LoadingToken)
-        private set
-
-    private val ephemerisData = MutableStateFlow(
-        EphemerisData(
-            medias = listOf(),
-            skip = 0,
-            limit = 20,
-            endReached = false
-        )
-    )
+    var uiState = MutableStateFlow(EphemerisUiState())
 
     init {
         verifyTokenAndFetchEphemeris()
@@ -58,10 +42,10 @@ class EphemerisViewModel(
             val token = userPreferencesRepository.token.firstOrNull()
             if (token.isNullOrEmpty()) {
                 Log.d(TAG, "Token is null or empty")
-                ephemerisUiState = EphemerisUiState.ErrorAuth()
+                uiState.update { it.copy(error = "Token is null or empty", isLoading = false) }
             } else {
-                ephemerisUiState = EphemerisUiState.Loading
-                getEphemeris()
+                uiState.update { it.copy(error = "", isLoading = true) }
+                fetchEphemeris()
             }
         }
     }
@@ -71,57 +55,77 @@ class EphemerisViewModel(
             try {
                 val tokenObject = apiRepository.login(username, password)
                 userPreferencesRepository.setTokenPreference(tokenObject.accessToken)
-                getEphemeris()
+                fetchEphemeris()
             } catch (e: HttpException) {
                 if (e.code() == 401) {
                     Log.d(TAG, "Error 401: Authentication error")
-                    ephemerisUiState = EphemerisUiState.ErrorAuth("Authentication error")
+                    uiState.update { it.copy(error = "Authentication error", isLoading = false) }
                 } else {
                     Log.d(TAG, "Login Error: " + e.message.toString())
-                    ephemerisUiState = EphemerisUiState.ErrorAuth("Login error: " + e.message.toString())
+                    uiState.update {
+                        it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
+                    }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, e.message.toString())
-                ephemerisUiState = EphemerisUiState.Error("Login Error: " + e.message.toString())
+                uiState.update {
+                    it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
-                ephemerisUiState = EphemerisUiState.Error("Login Error: " + e.message.toString())
+                uiState.update {
+                    it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
+                }
             }
         }
     }
 
-    fun getEphemeris() {
+    fun fetchEphemeris() {
         viewModelScope.launch {
-            ephemerisUiState = EphemerisUiState.Loading
-            ephemerisUiState = try {
-                val dataStart = ephemerisData.first()
-                val mediaResponse = apiRepository.getEphemeris(dataStart.skip, dataStart.limit)
-
-                ephemerisData.update {
+            uiState.update { it.copy(error = "", isLoading = true) }
+            try {
+                val mediaResponse = apiRepository.getEphemeris(
+                    skip = uiState.value.skip,
+                    limit = uiState.value.limit
+                )
+                uiState.update {
                     it.copy(
                         medias = it.medias + mediaResponse.data,
+                        isLoading = false,
+                        error = "",
                         skip = it.skip + it.limit,
                         endReached = mediaResponse.data.size < it.limit
                     )
                 }
-
-                val dataEnd = ephemerisData.first()
-
-                EphemerisUiState.Success(dataEnd)
             } catch (e: HttpException) {
                 if (e.code() == 401) {
                     Log.d(TAG, "Error 401: Authentication error")
-                    EphemerisUiState.ErrorAuth()
+                    uiState.update { it.copy(error = "Authentication error", isLoading = false) }
                 } else {
                     Log.d(TAG, e.message.toString())
-                    EphemerisUiState.Error("Error in ephemeris: " + e.message.toString())
+                    uiState.update {
+                        it.copy(
+                            error = "Error in ephemeris: " + e.message.toString(),
+                            isLoading = false
+                        )
+                    }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, e.message.toString())
-                EphemerisUiState.Error("Error in ephemeris: " + e.message.toString())
+                uiState.update {
+                    it.copy(
+                        error = "Error in ephemeris: " + e.message.toString(),
+                        isLoading = false
+                    )
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
-                EphemerisUiState.Error("Error in ephemeris: " + e.message.toString())
+                uiState.update {
+                    it.copy(
+                        error = "Error in ephemeris: " + e.message.toString(),
+                        isLoading = false
+                    )
+                }
             }
         }
     }

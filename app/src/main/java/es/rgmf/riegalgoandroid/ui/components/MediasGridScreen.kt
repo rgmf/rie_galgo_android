@@ -21,8 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,7 +36,6 @@ import es.rgmf.riegalgoandroid.MediasActivity
 import es.rgmf.riegalgoandroid.R
 import es.rgmf.riegalgoandroid.model.Media
 import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun MediasGridScreen(
