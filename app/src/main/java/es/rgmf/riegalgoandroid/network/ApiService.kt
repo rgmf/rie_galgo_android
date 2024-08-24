@@ -7,6 +7,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("auth/login/")
@@ -20,5 +21,8 @@ interface ApiService {
     suspend fun getUser(): UserResponse
 
     @GET("medias/ephemeris/")
-    suspend fun getEphemeris(): MediaResponse
+    suspend fun getEphemeris(
+        @Query("skip") skip: Int,
+        @Query("limit") limit: Int
+    ): MediaResponse
 }

@@ -11,7 +11,7 @@ import es.rgmf.riegalgoandroid.network.ApiService
 interface ApiRepository {
     suspend fun login(username: String, password: String): Token
     suspend fun getUser(): UserResponse
-    suspend fun getEphemeris(): MediaResponse
+    suspend fun getEphemeris(skip: Int, limit: Int): MediaResponse
 }
 
 /**
@@ -22,5 +22,5 @@ class NetworkApiRepository(
 ) : ApiRepository {
     override suspend fun login(username: String, password: String): Token = apiService.login(username, password)
     override suspend fun getUser(): UserResponse = apiService.getUser()
-    override suspend fun getEphemeris(): MediaResponse = apiService.getEphemeris()
+    override suspend fun getEphemeris(skip: Int, limit: Int): MediaResponse = apiService.getEphemeris(skip, limit)
 }

@@ -18,8 +18,13 @@ fun EphemerisScreen(modifier: Modifier = Modifier) {
         is EphemerisUiState.Loading -> LoadingScreen()
         is EphemerisUiState.Success -> {
             MediasGridScreen(
-                medias = uiState.medias,
-                modifier = modifier
+                medias = uiState.data.medias,
+                modifier = modifier,
+                onLoadMore = {
+                    if (!uiState.data.endReached) {
+                        ephemerisViewModel.getEphemeris()
+                    }
+                }
             )
         }
         is EphemerisUiState.Error -> {
