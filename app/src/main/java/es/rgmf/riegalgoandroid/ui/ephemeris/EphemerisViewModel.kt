@@ -24,6 +24,7 @@ data class EphemerisUiState(
     val error: String? = null,
     val skip: Int = 0,
     val limit: Int = 20,
+    val authError: Boolean = false,
     val endReached: Boolean = false
 )
 
@@ -46,7 +47,8 @@ class EphemerisViewModel(
                     it.copy(
                         medias = emptyList(),
                         error = "Token is null or empty: please, log in",
-                        isLoading = false
+                        isLoading = false,
+                        authError = true
                     )
                 }
             } else {
@@ -80,7 +82,8 @@ class EphemerisViewModel(
                         it.copy(
                             medias = emptyList(),
                             error = "Authentication error: please, log in",
-                            isLoading = false
+                            isLoading = false,
+                            authError = true
                         )
                     }
                 } else {
