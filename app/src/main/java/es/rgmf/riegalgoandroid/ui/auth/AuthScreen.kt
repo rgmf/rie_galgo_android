@@ -40,7 +40,7 @@ fun AuthScreen(
                 text = text,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(8.dp)
             )
         }
 

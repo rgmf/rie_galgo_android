@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -20,7 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +39,7 @@ import es.rgmf.riegalgoandroid.MediasActivity
 import es.rgmf.riegalgoandroid.R
 import es.rgmf.riegalgoandroid.model.Media
 import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun MediasGridScreen(
@@ -44,12 +48,22 @@ fun MediasGridScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val listState = rememberLazyGridState()
+    val lazyList = rememberLazyListState()
+    val buffer = 2
+
+    val loadMore = remember {
+        derivedStateOf {
+            val layoutInfo = lazyList.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
+
+            lastVisibleItemIndex > (totalItems - buffer)
+        }
+    }
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = modifier,
-        state = listState
     ) {
         items(items = medias, key = { media -> media.id }) { media ->
             MediaCard(
@@ -69,10 +83,12 @@ fun MediasGridScreen(
         }
 
         item {
-            LaunchedEffect(medias) {
-                if (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == medias.lastIndex) {
-                    onLoadMore()
-                }
+            LaunchedEffect(loadMore) {
+                snapshotFlow { loadMore.value }
+                    .distinctUntilChanged()
+                    .collect {
+                        onLoadMore()
+                    }
             }
         }
     }

@@ -21,7 +21,7 @@ import java.io.IOException
 data class EphemerisUiState(
     val medias: List<Media> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String = "",
+    val error: String? = null,
     val skip: Int = 0,
     val limit: Int = 20,
     val endReached: Boolean = false
@@ -42,47 +42,23 @@ class EphemerisViewModel(
             val token = userPreferencesRepository.token.firstOrNull()
             if (token.isNullOrEmpty()) {
                 Log.d(TAG, "Token is null or empty")
-                uiState.update { it.copy(error = "Token is null or empty", isLoading = false) }
+                uiState.update {
+                    it.copy(
+                        medias = emptyList(),
+                        error = "Token is null or empty: please, log in",
+                        isLoading = false
+                    )
+                }
             } else {
-                uiState.update { it.copy(error = "", isLoading = true) }
+                uiState.update { it.copy(error = null, isLoading = true) }
                 fetchEphemeris()
-            }
-        }
-    }
-
-    fun login(username: String, password: String) {
-        viewModelScope.launch {
-            try {
-                val tokenObject = apiRepository.login(username, password)
-                userPreferencesRepository.setTokenPreference(tokenObject.accessToken)
-                fetchEphemeris()
-            } catch (e: HttpException) {
-                if (e.code() == 401) {
-                    Log.d(TAG, "Error 401: Authentication error")
-                    uiState.update { it.copy(error = "Authentication error", isLoading = false) }
-                } else {
-                    Log.d(TAG, "Login Error: " + e.message.toString())
-                    uiState.update {
-                        it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
-                    }
-                }
-            } catch (e: IOException) {
-                Log.e(TAG, e.message.toString())
-                uiState.update {
-                    it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, e.toString())
-                uiState.update {
-                    it.copy(error = "Login error: " + e.message.toString(), isLoading = false)
-                }
             }
         }
     }
 
     fun fetchEphemeris() {
         viewModelScope.launch {
-            uiState.update { it.copy(error = "", isLoading = true) }
+            uiState.update { it.copy(error = null, isLoading = true) }
             try {
                 val mediaResponse = apiRepository.getEphemeris(
                     skip = uiState.value.skip,
@@ -100,7 +76,13 @@ class EphemerisViewModel(
             } catch (e: HttpException) {
                 if (e.code() == 401) {
                     Log.d(TAG, "Error 401: Authentication error")
-                    uiState.update { it.copy(error = "Authentication error", isLoading = false) }
+                    uiState.update {
+                        it.copy(
+                            medias = emptyList(),
+                            error = "Authentication error: please, log in",
+                            isLoading = false
+                        )
+                    }
                 } else {
                     Log.d(TAG, e.message.toString())
                     uiState.update {
