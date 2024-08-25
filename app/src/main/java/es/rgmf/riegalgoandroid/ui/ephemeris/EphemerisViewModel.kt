@@ -66,9 +66,13 @@ class EphemerisViewModel(
                     skip = uiState.value.skip,
                     limit = uiState.value.limit
                 )
+                val newMedias = mediaResponse.data.filterNot { media ->
+                    uiState.value.medias.any { it.id == media.id }
+                }
+
                 uiState.update {
                     it.copy(
-                        medias = it.medias + mediaResponse.data,
+                        medias = it.medias + newMedias,
                         isLoading = false,
                         error = "",
                         skip = it.skip + it.limit,
@@ -76,42 +80,42 @@ class EphemerisViewModel(
                     )
                 }
             } catch (e: HttpException) {
-                if (e.code() == 401) {
-                    Log.d(TAG, "Error 401: Authentication error")
-                    uiState.update {
-                        it.copy(
-                            medias = emptyList(),
-                            error = "Authentication error: please, log in",
-                            isLoading = false,
-                            authError = true
-                        )
-                    }
-                } else {
-                    Log.d(TAG, e.message.toString())
-                    uiState.update {
-                        it.copy(
-                            error = "Error in ephemeris: " + e.message.toString(),
-                            isLoading = false
-                        )
-                    }
-                }
+                handleHttpException(e)
             } catch (e: IOException) {
-                Log.e(TAG, e.message.toString())
-                uiState.update {
-                    it.copy(
-                        error = "Error in ephemeris: " + e.message.toString(),
-                        isLoading = false
-                    )
-                }
+                handleException("Network error in ephemeris: ", e)
             } catch (e: Exception) {
-                Log.e(TAG, e.toString())
-                uiState.update {
-                    it.copy(
-                        error = "Error in ephemeris: " + e.message.toString(),
-                        isLoading = false
-                    )
-                }
+                handleException("Unexpected error in ephemeris: ", e)
             }
+        }
+    }
+
+    private fun handleHttpException(e: HttpException) {
+        uiState.update {
+            if (e.code() == 401) {
+                Log.d(TAG, "Error 401: Authentication error")
+                it.copy(
+                    medias = emptyList(),
+                    error = "Authentication error: please, log in",
+                    isLoading = false,
+                    authError = true
+                )
+            } else {
+                Log.d(TAG, e.message.toString())
+                it.copy(
+                    error = "Error in ephemeris: " + e.message.toString(),
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    private fun handleException(message: String, e: Exception) {
+        Log.e(TAG, e.message.toString())
+        uiState.update {
+            it.copy(
+                error = message + e.message.toString(),
+                isLoading = false
+            )
         }
     }
 
