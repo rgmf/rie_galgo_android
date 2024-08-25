@@ -6,6 +6,10 @@
     <string name="error_no_medias_or_not_valid_selected_media">
         There are no medias to show or the media selected is not in the list of medias
     </string>
+    <string name="error_token">Token is null or empty. Please, log in</string>
+    <string name="error_authentication">Authentication error. Please, log in</string>
+    <string name="error_unexpected_ephemeris">Unexpected error in ephemeris</string>
+    <string name="error_network_ephemeris">Network error in ephemeris</string>
 
     <string name="loading">Loading</string>
     <string name="loading_failed">Failed to load</string>

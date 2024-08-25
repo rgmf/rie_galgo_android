@@ -1,12 +1,14 @@
 package es.rgmf.riegalgoandroid.ui.ephemeris
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import es.rgmf.riegalgoandroid.R
 import retrofit2.HttpException
 import es.rgmf.riegalgoandroid.RieGalgoApplication
 import es.rgmf.riegalgoandroid.data.ApiRepository
@@ -21,7 +23,7 @@ import java.io.IOException
 data class EphemerisUiState(
     val medias: List<Media> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null,
+    @StringRes val error: Int? = null,
     val skip: Int = 0,
     val limit: Int = 20,
     val authError: Boolean = false,
@@ -46,7 +48,7 @@ class EphemerisViewModel(
                 uiState.update {
                     it.copy(
                         medias = emptyList(),
-                        error = "Token is null or empty: please, log in",
+                        error = R.string.error_token,
                         isLoading = false,
                         authError = true
                     )
@@ -74,7 +76,7 @@ class EphemerisViewModel(
                     it.copy(
                         medias = it.medias + newMedias,
                         isLoading = false,
-                        error = "",
+                        error = null,
                         skip = it.skip + it.limit,
                         endReached = mediaResponse.data.size < it.limit
                     )
@@ -82,9 +84,9 @@ class EphemerisViewModel(
             } catch (e: HttpException) {
                 handleHttpException(e)
             } catch (e: IOException) {
-                handleException("Network error in ephemeris: ", e)
+                handleException(R.string.error_network_ephemeris, e)
             } catch (e: Exception) {
-                handleException("Unexpected error in ephemeris: ", e)
+                handleException(R.string.error_unexpected_ephemeris, e)
             }
         }
     }
@@ -92,28 +94,28 @@ class EphemerisViewModel(
     private fun handleHttpException(e: HttpException) {
         uiState.update {
             if (e.code() == 401) {
-                Log.d(TAG, "Error 401: Authentication error")
+                Log.d(TAG, "Error 401: Authentication error: " + e.message())
                 it.copy(
                     medias = emptyList(),
-                    error = "Authentication error: please, log in",
+                    error = R.string.error_authentication,
                     isLoading = false,
                     authError = true
                 )
             } else {
-                Log.d(TAG, e.message.toString())
+                Log.d(TAG, e.message())
                 it.copy(
-                    error = "Error in ephemeris: " + e.message.toString(),
+                    error = R.string.error_unexpected_ephemeris,
                     isLoading = false
                 )
             }
         }
     }
 
-    private fun handleException(message: String, e: Exception) {
+    private fun handleException(@StringRes message: Int, e: Exception) {
         Log.e(TAG, e.message.toString())
         uiState.update {
             it.copy(
-                error = message + e.message.toString(),
+                error = message,
                 isLoading = false
             )
         }
