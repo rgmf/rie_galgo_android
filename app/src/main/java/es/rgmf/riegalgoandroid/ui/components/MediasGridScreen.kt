@@ -38,8 +38,11 @@ import coil.request.ImageRequest
 import es.rgmf.riegalgoandroid.MediasActivity
 import es.rgmf.riegalgoandroid.R
 import es.rgmf.riegalgoandroid.model.Media
+import es.rgmf.riegalgoandroid.model.MediaType
+import es.rgmf.riegalgoandroid.network.thumbnailUrl
 import es.rgmf.riegalgoandroid.ui.PreferencesViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.serialization.json.Json
 
 @Composable
 fun MediasGridScreen(
@@ -70,9 +73,9 @@ fun MediasGridScreen(
                 media,
                 onClickMedia = {
                     onClickMedia(
-                        clickedMediId = it,
                         context = context,
-                        allIds = medias.map { it.id }
+                        clickedMedia = media,
+                        allMedias = medias.map { Json.encodeToString(Media.serializer(), it) }
                     )
                 },
                 modifier = Modifier
@@ -94,11 +97,11 @@ fun MediasGridScreen(
     }
 }
 
-fun onClickMedia(clickedMediId: Int, context: Context, allIds: List<Int>) {
+fun onClickMedia(context: Context, clickedMedia: Media, allMedias: List<String>) {
 
     val intent = Intent(context, MediasActivity::class.java).apply {
-        putExtra(MediasActivity.EXTRA_SELECTED_MEDIA_ID, clickedMediId)
-        putIntegerArrayListExtra(MediasActivity.EXTRA_MEDIAS_ID, ArrayList(allIds))
+        putExtra(MediasActivity.EXTRA_SELECTED_MEDIA_ID, clickedMedia.id)
+        putStringArrayListExtra(MediasActivity.EXTRA_MEDIAS, allMedias as ArrayList<String>)
     }
     context.startActivity(intent)
 }
@@ -125,7 +128,7 @@ fun MediaCard(
                 AsyncImage(
                     model = ImageRequest
                         .Builder(context = LocalContext.current)
-                        .data("https://rieapi.rgmf.es/medias/${media.id}/thumbnail/")
+                        .data(thumbnailUrl(media.id.toString()))
                         .addHeader("Authorization", "Bearer ${token}")
                         .crossfade(true)
                         .build(),
@@ -143,7 +146,7 @@ fun MediaCard(
                 )
             }
 
-            if (media.mediaType == "video") {
+            if (media.mediaType == MediaType.VIDEO) {
                 Icon(
                     painter = painterResource(R.drawable.play_circle),
                     contentDescription = stringResource(R.string.play_video),

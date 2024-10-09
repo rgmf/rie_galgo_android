@@ -68,6 +68,7 @@ class EphemerisViewModel(
                     skip = uiState.value.skip,
                     limit = uiState.value.limit
                 )
+                Log.d("AAA", mediaResponse.toString())
                 val newMedias = mediaResponse.data.filterNot { media ->
                     uiState.value.medias.any { it.id == media.id }
                 }

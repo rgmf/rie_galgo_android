@@ -69,6 +69,11 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
+    // ExoPlayer
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.dash)
+    implementation(libs.media3.ui)
+
     // Serialization
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.volley)

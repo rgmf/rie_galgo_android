@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import es.rgmf.riegalgoandroid.network.ApiService
+import es.rgmf.riegalgoandroid.network.BASE_URL
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -54,8 +55,6 @@ interface AppContainer {
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
 class DefaultAppContainer(private val context: Context) : AppContainer {
-    private val baseUrl = "https://rieapi.rgmf.es/"
-
     /**
      * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
      */
@@ -72,7 +71,7 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .baseUrl(baseUrl)
+        .baseUrl(BASE_URL)
         .client(
             OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor(userPreferencesRepository.token))
