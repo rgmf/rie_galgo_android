@@ -141,6 +141,12 @@ fun MediasScreen(
                                 .fillMaxWidth()
                                 .aspectRatio(16f / 9f)
                         )
+                    MediaType.UNKNOWN.type ->
+                        Image(
+                            painter = painterResource(R.drawable.ic_broken_image),
+                            contentDescription = stringResource(R.string.loading),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                 }
             }
         } else {
